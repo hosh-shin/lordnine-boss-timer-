@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<!-- saved from url=(0123)file:///C:/Users/John%20Vishnu%20Golosino/Documents/Rockstar%20Games/GTA%20V/Profiles/BCA262DB/Lordnine%20Boss%20Timer.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LORDNINE Boss Respawn Tracker</title>
+
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #1d1f24;
+  --panel: #25282f;
+  --line: #383d47;
+  --text: #f0f3f8;
+  --muted: #aeb7c5;
+  --gold: #d9ad58;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.4 system-ui, Segoe UI, sans-serif;
+  padding: 22px;
+}
+
+.app {
+  width: min(100%, 1000px);
+  margin: auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+h1 { font-size: 17px; margin: 0; }
+
+.subtitle {
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 3px;
+}
+
+.region {
+  border: 1px solid #80652f;
+  color: var(--gold);
+  border-radius: 20px;
+  padding: 5px 10px;
+  font-size: 10px;
+}
+
+.filter {
+  display: flex;
+  justify-content: center;
+  margin: 8px 0 28px;
+}
+
+select, input {
+  background: #11151c;
+  border: 1px solid #444c59;
+  border-radius: 6px;
+  color: var(--text);
+  padding: 8px;
+  font: inherit;
+  font-size: 12px;
+}
+
+.filter select {
+  width: 150px;
+  background: #f6f6f6;
+  color: #171717;
+}
+
+.section { margin-bottom: 17px; }
+
+.section-title {
+  font-size: 13px;
+  font-weight: 750;
+  margin: 0 0 7px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border-radius: 8px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 650px;
+  background: #25282e;
+}
+
+th {
+  background: #30333a;
+  text-align: left;
+  font-size: 12px;
+  padding: 7px 10px;
+}
+
+td {
+  padding: 7px 10px;
+  border-top: 1px solid #2c3037;
+  white-space: nowrap;
+}
+
+tbody tr:nth-child(even) { background: #292c32; }
+
+.name { font-weight: 600; }
+.status { color: #f5c66b; }
+.alive { color: #ff6868; }
+.upcoming { color: #a9c7ff; }
+
+.count {
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+}
+
+.actions {
+  display: flex;
+  gap: 5px;
+}
+
+button {
+  border: 1px solid #4a5260;
+  border-radius: 5px;
+  background: #333b48;
+  color: var(--text);
+  padding: 5px 8px;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+button:hover { border-color: var(--gold); }
+
+button.primary {
+  background: #715421;
+  border-color: #98743b;
+}
+
+button.mark { color: #8ee3ad; }
+button.remove { color: #ff9696; }
+
+.empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 16px;
+}
+
+/* INPUT WINDOW */
+
+.add-box {
+  margin: 22px auto 0;
+  max-width: 760px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #242830;
+  padding: 13px;
+}
+
+.add-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.add-head strong { font-size: 13px; }
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1.1fr .9fr 1.2fr auto;
+  gap: 8px;
+  align-items: end;
+}
+
+.field label {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  min-width: 0;
+}
+
+.mode-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+  margin-top: 12px;
+  padding-top: 11px;
+}
+
+.mode-label {
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 700;
+  letter-spacing: .08em;
+}
+
+.switch {
+  display: flex;
+  background: #11151c;
+  border: 1px solid #444c59;
+  border-radius: 7px;
+  padding: 3px;
+  gap: 3px;
+}
+
+.switch button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 6px 13px;
+  font-weight: 750;
+  letter-spacing: .06em;
+}
+
+.switch button.active {
+  background: #765925;
+  color: white;
+  border-radius: 5px;
+}
+
+.hint {
+  font-size: 10px;
+  color: var(--muted);
+  margin: 8px 0 0;
+}
+
+.hidden { display: none !important; }
+
+/* MARK DEAD WINDOW */
+
+.modal-bg {
+  position: fixed;
+  inset: 0;
+  background: #000a;
+  display: none;
+  place-items: center;
+  padding: 16px;
+  z-index: 10;
+}
+
+.modal-bg.open { display: grid; }
+
+.modal {
+  width: min(100%, 340px);
+  background: #242a34;
+  border: 1px solid #4a5260;
+  border-radius: 10px;
+  padding: 15px;
+}
+
+.modal h2 {
+  font-size: 14px;
+  margin: 0 0 5px;
+}
+
+.modal p {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.modal input { width: 100%; }
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+@media(max-width:650px) {
+  body { padding: 12px; }
+
+  .form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .form-grid .field:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .form-grid button {
+    grid-column: 1 / -1;
+  }
+
+  .mode-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+  <header class="header">
+    <div>
+      <h1>LORDNINE · BOSS RESPAWN TRACKER</h1>
+      <div class="subtitle">
+        Field / Unique Bosses · SEA · Philippine Time (UTC+8)
+      </div>
+    </div>
+    <span class="region">SEA SERVER</span>
+  </header>
+
+  <div class="filter">
+    <select id="viewFilter">
+      <option value="all">All</option>
+      <option value="fixed">Fixed only</option>
+      <option value="dynamic">Dynamic only</option>
+    </select>
+  </div>
+
+  <!-- FIXED BOSSES -->
+
+  <section class="section" id="fixedSection">
+    <h2 class="section-title">⚡ Fixed Respawns</h2>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Boss</th>
+            <th>Status</th>
+            <th>Respawn Time</th>
+            <th>Countdown</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="fixedRows">
+      <tr>
+        <td class="name">Ringor</td>
+
+        <td><span class="status">⚡ Today</span></td>
+
+        <td>
+          Every Saturday ·
+          Sat, Oct 31, 2026, 2:00 PM
+        </td>
+
+        <td class="count" data-count="1793426400000">4h 37m 46s</td>
+
+        <td>
+          <div class="actions">
+            <button data-fedit="3">Edit</button>
+            <button class="remove" data-fdel="3">×</button>
+          </div>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="name">Milavy</td>
+
+        <td><span class="status">⚡ Today</span></td>
+
+        <td>
+          Every Saturday ·
+          Sat, Oct 31, 2026, 4:00 PM
+        </td>
+
+        <td class="count" data-count="1793433600000">6h 37m 46s</td>
+
+        <td>
+          <div class="actions">
+            <button data-fedit="2">Edit</button>
+            <button class="remove" data-fdel="2">×</button>
+          </div>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="name">MOTTI</td>
+
+        <td><span class="status">⚡ Today</span></td>
+
+        <td>
+          Every Saturday ·
+          Sat, Oct 31, 2026, 7:00 PM
+        </td>
+
+        <td class="count" data-count="1793444400000">9h 37m 46s</td>
+
+        <td>
+          <div class="actions">
+            <button data-fedit="5">Edit</button>
+            <button class="remove" data-fdel="5">×</button>
+          </div>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="name">Libitina</td>
+
+        <td><span class="status">⚡ Today</span></td>
+
+        <td>
+          Every Saturday ·
+          Sat, Oct 31, 2026, 9:00 PM
+        </td>
+
+        <td class="count" data-count="1793451600000">11h 37m 46s</td>
+
+        <td>
+          <div class="actions">
+            <button data-fedit="4">Edit</button>
+            <button class="remove" data-fdel="4">×</button>
+          </div>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="name">Clemantis</td>
+
+        <td><span class="upcoming">Upcoming</span></td>
+
+        <td>
+          Every Monday ·
+          Mon, Nov 2, 2026, 11:30 AM
+        </td>
+
+        <td class="count" data-count="1793590200000">2d 2h 7m 46s</td>
+
+        <td>
+          <div class="actions">
+            <button data-fedit="0">Edit</button>
+            <button class="remove" data-fdel="0">×</button>
+          </div>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="name">Clemantis</td>
+
+        <td><span class="upcoming">Upcoming</span></td>
+
+        <td>
+          Every Thursday ·
+          Thu, Nov 5, 2026, 5:00 PM
+        </td>
+
+        <td class="count" data-count="1793869200000">5d 7h 37m 46s</td>
+
+        <td>
+          <div class="actions">
+            <button data-fedit="1">Edit</button>
+            <button class="remove" data-fdel="1">×</button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- DYNAMIC BOSSES -->
+
+  <section class="section" id="dynamicSection">
+    <h2 class="section-title">🔄 Dynamic Respawns</h2>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Boss</th>
+            <th>Status</th>
+            <th>Respawn Time</th>
+            <th>Countdown</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="dynamicRows">
+      <tr>
+        <td class="name">Livera</td>
+
+        <td><span class="status">⚡ Today</span></td>
+
+        <td>
+          Sat, Oct 31, 2026, 2:38 PM
+          <div class="subtitle">
+            Dead: Fri, Oct 30, 2026, 2:38 PM
+          </div>
+        </td>
+
+        <td class="count" data-count="1793428680000">5h 15m 46s</td>
+
+        <td>
+          <div class="actions">
+            <button class="mark" data-mark="10">
+              Mark Dead
+            </button>
+
+            <button data-dedit="10">Edit</button>
+
+            <button class="remove" data-ddel="10">×</button>
+          </div>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="name">Undomiel</td>
+
+        <td><span class="status">⚡ Today</span></td>
+
+        <td>
+          Sat, Oct 31, 2026, 2:50 PM
+          <div class="subtitle">
+            Dead: Fri, Oct 30, 2026, 2:50 PM
+          </div>
+        </td>
+
+        <td class="count" data-count="1793429400000">5h 27m 46s</td>
+
+        <td>
+          <div class="actions">
+            <button class="mark" data-mark="9">
+              Mark Dead
+            </button>
+
+            <button data-dedit="9">Edit</button>
+
+            <button class="remove" data-ddel="9">×</button>
+          </div>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="name">Lady Dalia</td>
+
+        <td><span class="status">⚡ Today</span></td>
+
+        <td>
+          Sat, Oct 31, 2026, 3:01 PM
+          <div class="subtitle">
+            Dead: Fri, Oct 30, 2026, 9:01 PM
+          </div>
+        </td>
+
+        <td class="count" data-count="1793430060000">5h 38m 46s</td>
+
+        <td>
+          <div class="actions">
+            <button class="mark" data-mark="8">
+              Mark Dead
+            </button>
+
+            <button data-dedit="8">Edit</button>
+
+            <button class="remove" data-ddel="8">×</button>
+          </div>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="name">Titore</td>
+
+        <td><span class="status">⚡ Today</span></td>
+
+        <td>
+          Sat, Oct 31, 2026, 4:59 PM
+          <div class="subtitle">
+            Dead: Fri, Oct 30, 2026, 3:59 AM
+          </div>
+        </td>
+
+        <td class="count" data-count="1793437140000">7h 36m 46s</td>
+
+        <td>
+          <div class="actions">
+            <button class="mark" data-mark="15">
+              Mark Dead
+            </button>
+
+            <button data-dedit="15">Edit</button>
+
+            <button class="remove" data-ddel="15">×</button>
+          </div>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="name">Ego</td>
+
+        <td><span class="status">⚡ Today</span></td>
+
+        <td>
+          Sat, Oct 31, 2026, 5:44 PM
+          <div class="subtitle">
+            Dead: Fri, Oct 30, 2026, 8:44 PM
+          </div>
+        </td>
+
+        <td class="count" data-count="1793439840000">8h 21m 46s</td>
+
+        <td>
+          <div class="actions">
+            <button class="mark" data-mark="14">
+              Mark Dead
+            </button>
+
+            <button data-dedit="14">Edit</button>
+
+            <button class="remove" data-ddel="14">×</button>
+          </div>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="name">Amentis</td>
+
+        <td><span class="upcoming">Upcoming</span></td>
+
+        <td>
+          Sun, Nov 1, 2026, 6:00 AM
+          <div class="subtitle">
+            Dead: Sat, Oct 31, 2026, 1:00 AM
+          </div>
+        </td>
+
+        <td class="count" data-count="1793484000000">20h 37m 46s</td>
+
+        <td>
+          <div class="actions">
+            <button class="mark" data-mark="6">
+              Mark Dead
+            </button>
+
+            <button data-dedit="6">Edit</button>
+
+            <button class="remove" data-ddel="6">×</button>
+          </div>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="name">General Aquleus</td>
+
+        <td><span class="upcoming">Upcoming</span></td>
+
+        <td>
+          Sun, Nov 1, 2026, 6:04 AM
+          <div class="subtitle">
+            Dead: Sat, Oct 31, 2026, 1:04 AM
+          </div>
+        </td>
+
+        <td class="count" data-count="1793484240000">20h 41m 46s</td>
+
+        <td>
+          <div class="actions">
+            <button class="mark" data-mark="7">
+              Mark Dead
+            </button>
+
+            <button data-dedit="7">Edit</button>
+
+            <button class="remove" data-ddel="7">×</button>
+          </div>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="name">Wannitas</td>
+
+        <td><span class="upcoming">Upcoming</span></td>
+
+        <td>
+          Sun, Nov 1, 2026, 2:42 PM
+          <div class="subtitle">
+            Dead: Fri, Oct 30, 2026, 2:42 PM
+          </div>
+        </td>
+
+        <td class="count" data-count="1793515320000">1d 5h 19m 46s</td>
+
+        <td>
+          <div class="actions">
+            <button class="mark" data-mark="11">
+              Mark Dead
+            </button>
+
+            <button data-dedit="11">Edit</button>
+
+            <button class="remove" data-ddel="11">×</button>
+          </div>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="name">Metus</td>
+
+        <td><span class="upcoming">Upcoming</span></td>
+
+        <td>
+          Sun, Nov 1, 2026, 2:44 PM
+          <div class="subtitle">
+            Dead: Fri, Oct 30, 2026, 2:44 PM
+          </div>
+        </td>
+
+        <td class="count" data-count="1793515440000">1d 5h 21m 46s</td>
+
+        <td>
+          <div class="actions">
+            <button class="mark" data-mark="12">
+              Mark Dead
+            </button>
+
+            <button data-dedit="12">Edit</button>
+
+            <button class="remove" data-ddel="12">×</button>
+          </div>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="name">Duplican</td>
+
+        <td><span class="upcoming">Upcoming</span></td>
+
+        <td>
+          Sun, Nov 1, 2026, 2:48 PM
+          <div class="subtitle">
+            Dead: Fri, Oct 30, 2026, 2:48 PM
+          </div>
+        </td>
+
+        <td class="count" data-count="1793515680000">1d 5h 25m 46s</td>
+
+        <td>
+          <div class="actions">
+            <button class="mark" data-mark="13">
+              Mark Dead
+            </button>
+
+            <button data-dedit="13">Edit</button>
+
+            <button class="remove" data-ddel="13">×</button>
+          </div>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="name">Gareth</td>
+
+        <td><span class="upcoming">Upcoming</span></td>
+
+        <td>
+          Sun, Nov 1, 2026, 2:58 PM
+          <div class="subtitle">
+            Dead: Sat, Oct 31, 2026, 6:58 AM
+          </div>
+        </td>
+
+        <td class="count" data-count="1793516280000">1d 5h 35m 46s</td>
+
+        <td>
+          <div class="actions">
+            <button class="mark" data-mark="1">
+              Mark Dead
+            </button>
+
+            <button data-dedit="1">Edit</button>
+
+            <button class="remove" data-ddel="1">×</button>
+          </div>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="name">Baron Braudmore</td>
+
+        <td><span class="upcoming">Upcoming</span></td>
+
+        <td>
+          Sun, Nov 1, 2026, 3:01 PM
+          <div class="subtitle">
+            Dead: Sat, Oct 31, 2026, 7:01 AM
+          </div>
+        </td>
+
+        <td class="count" data-count="1793516460000">1d 5h 38m 46s</td>
+
+        <td>
+          <div class="actions">
+            <button class="mark" data-mark="0">
+              Mark Dead
+            </button>
+
+            <button data-dedit="0">Edit</button>
+
+            <button class="remove" data-ddel="0">×</button>
+          </div>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="name">Secreta</td>
+
+        <td><span class="upcoming">Upcoming</span></td>
+
+        <td>
+          Mon, Nov 2, 2026, 6:39 PM
+          <div class="subtitle">
+            Dead: Sat, Oct 31, 2026, 4:39 AM
+          </div>
+        </td>
+
+        <td class="count" data-count="1793615940000">2d 9h 16m 46s</td>
+
+        <td>
+          <div class="actions">
+            <button class="mark" data-mark="3">
+              Mark Dead
+            </button>
+
+            <button data-dedit="3">Edit</button>
+
+            <button class="remove" data-ddel="3">×</button>
+          </div>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="name">Ordo</td>
+
+        <td><span class="upcoming">Upcoming</span></td>
+
+        <td>
+          Mon, Nov 2, 2026, 6:42 PM
+          <div class="subtitle">
+            Dead: Sat, Oct 31, 2026, 4:42 AM
+          </div>
+        </td>
+
+        <td class="count" data-count="1793616120000">2d 9h 19m 46s</td>
+
+        <td>
+          <div class="actions">
+            <button class="mark" data-mark="4">
+              Mark Dead
+            </button>
+
+            <button data-dedit="4">Edit</button>
+
+            <button class="remove" data-ddel="4">×</button>
+          </div>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="name">Asta</td>
+
+        <td><span class="upcoming">Upcoming</span></td>
+
+        <td>
+          Mon, Nov 2, 2026, 6:45 PM
+          <div class="subtitle">
+            Dead: Sat, Oct 31, 2026, 4:45 AM
+          </div>
+        </td>
+
+        <td class="count" data-count="1793616300000">2d 9h 22m 46s</td>
+
+        <td>
+          <div class="actions">
+            <button class="mark" data-mark="2">
+              Mark Dead
+            </button>
+
+            <button data-dedit="2">Edit</button>
+
+            <button class="remove" data-ddel="2">×</button>
+          </div>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="name">Supore</td>
+
+        <td><span class="upcoming">Upcoming</span></td>
+
+        <td>
+          Mon, Nov 2, 2026, 6:47 PM
+          <div class="subtitle">
+            Dead: Sat, Oct 31, 2026, 4:47 AM
+          </div>
+        </td>
+
+        <td class="count" data-count="1793616420000">2d 9h 24m 46s</td>
+
+        <td>
+          <div class="actions">
+            <button class="mark" data-mark="5">
+              Mark Dead
+            </button>
+
+            <button data-dedit="5">Edit</button>
+
+            <button class="remove" data-ddel="5">×</button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ADD BOSS -->
+
+  <section class="add-box">
+
+    <div class="add-head">
+      <strong>＋ Add Boss / Set Timer</strong>
+      <span class="subtitle" id="formModeLabel">DYNAMIC TIMER</span>
+    </div>
+
+    <form id="bossForm">
+
+      <div class="form-grid">
+
+        <div class="field">
+          <label for="bossName">BOSS NAME</label>
+          <input id="bossName" required="" placeholder="Enter boss name">
+        </div>
+
+        <!-- DYNAMIC INPUTS -->
+
+        <div class="field" id="hoursField">
+          <label for="hours">RESPAWN INTERVAL (HOURS)</label>
+          <input id="hours" type="number" min=".01" step=".01" placeholder="e.g. 6" required="">
+        </div>
+
+        <div class="field" id="deathField">
+          <label for="deathTime">TIME OF DEATH (PH TIME)</label>
+          <input id="deathTime" type="datetime-local" required="">
+        </div>
+
+        <!-- FIXED INPUTS -->
+
+        <div class="field hidden" id="fixedDayField">
+          <label for="fixedDay">SPAWN DAY</label>
+          <select id="fixedDay">
+            <option value="0">Sunday</option>
+            <option value="1">Monday</option>
+            <option value="2">Tuesday</option>
+            <option value="3">Wednesday</option>
+            <option value="4">Thursday</option>
+            <option value="5">Friday</option>
+            <option value="6">Saturday</option>
+          </select>
+        </div>
+
+        <div class="field hidden" id="fixedTimeField">
+          <label for="fixedTime">SPAWN TIME (PH TIME)</label>
+          <input id="fixedTime" type="time">
+        </div>
+
+        <button class="primary" type="submit">Add Boss</button>
+
+      </div>
+
+      <!-- TIMER SWITCH -->
+
+      <div class="mode-row">
+        <span class="mode-label">TIMER TYPE</span>
+
+        <div class="switch">
+          <button type="button" id="dynamicMode" class="active">
+            DYNAMIC
+          </button>
+
+          <button type="button" id="fixedMode" class="">
+            FIXED
+          </button>
+        </div>
+      </div>
+
+      <p class="hint" id="modeHint">Dynamic: enter the time of death and respawn interval.</p>
+
+    </form>
+  </section>
+
+  <p class="hint" style="text-align:center;margin-top:10px">
+    Countdown predictions are based on manually entered times.
+    This tracker is not connected to the live game server.
+  </p>
+
+</div>
+
+<!-- MARK DEAD WINDOW -->
+
+<div class="modal-bg" id="deathModal">
+  <div class="modal">
+    <h2>Mark Boss Dead</h2>
+    <p id="deathBossLabel">Enter the time of death.</p>
+
+    <label class="subtitle" for="newDeathTime">TIME OF DEATH</label>
+    <input id="newDeathTime" type="datetime-local">
+
+    <div class="modal-actions">
+      <button id="cancelDeath">Cancel</button>
+      <button class="primary" id="saveDeath">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+/* STORAGE */
+
+const DKEY = 'lordnineTrackerDynamicV5';
+const FKEY = 'lordnineTrackerFixedV6';
+
+let dynamics = JSON.parse(localStorage.getItem(DKEY) || '[]');
+let fixed = JSON.parse(localStorage.getItem(FKEY) || '[]');
+
+let mode = 'dynamic';
+let markIndex = null;
+
+const $ = id => document.getElementById(id);
+
+const DAYS = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday'
+];
+
+
+/* PHILIPPINE TIME */
+
+const formatter = new Intl.DateTimeFormat('en-PH', {
+  timeZone: 'Asia/Manila',
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+  hour: 'numeric',
+  minute: '2-digit',
+  hour12: true,
+  weekday: 'short'
+});
+
+function phToMs(value) {
+  if (!value) return NaN;
+
+  const [date, time] = value.split('T');
+  const [y, m, d] = date.split('-').map(Number);
+  const [h, min] = time.split(':').map(Number);
+
+  return Date.UTC(y, m - 1, d, h - 8, min);
+}
+
+function msToPH(timestamp) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Manila',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23'
+  }).formatToParts(new Date(timestamp));
+
+  const obj = Object.fromEntries(
+    parts.map(p => [p.type, p.value])
+  );
+
+  return `${obj.year}-${obj.month}-${obj.day}T${obj.hour}:${obj.minute}`;
+}
+
+
+/* NEXT WEEKLY FIXED SPAWN */
+
+function getNextFixedSpawn(day, time, now = Date.now()) {
+
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Manila',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).formatToParts(new Date(now));
+
+  const date = Object.fromEntries(
+    parts.map(p => [p.type, p.value])
+  );
+
+  const year = Number(date.year);
+  const month = Number(date.month);
+  const dateDay = Number(date.day);
+
+  const [hours, minutes] = time.split(':').map(Number);
+
+  const currentDay = new Date(
+    Date.UTC(year, month - 1, dateDay)
+  ).getUTCDay();
+
+  let daysUntil = (Number(day) - currentDay + 7) % 7;
+
+  let nextSpawn = Date.UTC(
+    year,
+    month - 1,
+    dateDay + daysUntil,
+    hours - 8,
+    minutes
+  );
+
+  // If today's scheduled time has passed,
+  // move the spawn to the following week.
+
+  if (nextSpawn <= now) {
+    nextSpawn += 7 * 24 * 60 * 60 * 1000;
+  }
+
+  return nextSpawn;
+}
+
+
+/* COUNTDOWN */
+
+function countdown(ms) {
+
+  if (ms <= 0) return 'Now!';
+
+  let seconds = Math.floor(ms / 1000);
+
+  const days = Math.floor(seconds / 86400);
+  seconds %= 86400;
+
+  const hours = Math.floor(seconds / 3600);
+  seconds %= 3600;
+
+  const minutes = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+
+  return `${days ? days + 'd ' : ''}${hours}h ${minutes}m ${secs}s`;
+}
+
+
+/* HTML SAFETY */
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[char]));
+}
+
+
+/* SWITCH DYNAMIC / FIXED */
+
+function setMode(next) {
+
+  mode = next;
+
+  const isDynamic = mode === 'dynamic';
+
+  $('dynamicMode').classList.toggle('active', isDynamic);
+  $('fixedMode').classList.toggle('active', !isDynamic);
+
+  $('hoursField').classList.toggle('hidden', !isDynamic);
+  $('deathField').classList.toggle('hidden', !isDynamic);
+
+  $('fixedDayField').classList.toggle('hidden', isDynamic);
+  $('fixedTimeField').classList.toggle('hidden', isDynamic);
+
+  $('hours').required = isDynamic;
+  $('deathTime').required = isDynamic;
+
+  $('fixedDay').required = !isDynamic;
+  $('fixedTime').required = !isDynamic;
+
+  $('formModeLabel').textContent =
+    isDynamic ? 'DYNAMIC TIMER' : 'FIXED TIMER';
+
+  $('modeHint').textContent = isDynamic
+    ? 'Dynamic: enter the time of death and respawn interval.'
+    : 'Fixed: enter the weekly spawn day and time. This schedule repeats every week.';
+}
+
+$('dynamicMode').onclick = () => setMode('dynamic');
+$('fixedMode').onclick = () => setMode('fixed');
+
+
+/* STATUS */
+
+function statusLabel(next, now) {
+
+  if (next <= now) {
+    return '<span class="alive">🟢 Spawn time reached</span>';
+  }
+
+  const today =
+    new Date(now).toDateString() ===
+    new Date(next).toDateString();
+
+  return today
+    ? '<span class="status">⚡ Today</span>'
+    : '<span class="upcoming">Upcoming</span>';
+}
+
+
+/* RENDER TABLES */
+
+function render() {
+
+  const now = Date.now();
+  const filter = $('viewFilter').value;
+
+  $('fixedSection').classList.toggle(
+    'hidden',
+    filter === 'dynamic'
+  );
+
+  $('dynamicSection').classList.toggle(
+    'hidden',
+    filter === 'fixed'
+  );
+
+
+  /* FIXED BOSSES */
+
+  const fixedList = fixed
+    .map((boss, index) => ({
+      ...boss,
+      index,
+      next: getNextFixedSpawn(boss.day, boss.time, now)
+    }))
+    .sort((a, b) => a.next - b.next);
+
+  $('fixedRows').innerHTML = fixedList.length
+
+    ? fixedList.map(boss => `
+      <tr>
+        <td class="name">${escapeHtml(boss.name)}</td>
+
+        <td>${statusLabel(boss.next, now)}</td>
+
+        <td>
+          Every ${DAYS[boss.day]} ·
+          ${formatter.format(boss.next)}
+        </td>
+
+        <td class="count" data-count="${boss.next}">
+          ${countdown(boss.next - now)}
+        </td>
+
+        <td>
+          <div class="actions">
+            <button data-fedit="${boss.index}">Edit</button>
+            <button class="remove" data-fdel="${boss.index}">×</button>
+          </div>
+        </td>
+      </tr>
+    `).join('')
+
+    : `
+      <tr>
+        <td colspan="5" class="empty">
+          No fixed bosses added.
+        </td>
+      </tr>
+    `;
+
+
+  /* DYNAMIC BOSSES */
+
+  const dynamicList = dynamics
+    .map((boss, index) => ({
+      ...boss,
+      index,
+      next: Number(boss.deathAt) +
+        Number(boss.hours) * 3600000
+    }))
+    .sort((a, b) => a.next - b.next);
+
+  $('dynamicRows').innerHTML = dynamicList.length
+
+    ? dynamicList.map(boss => `
+      <tr>
+        <td class="name">${escapeHtml(boss.name)}</td>
+
+        <td>${statusLabel(boss.next, now)}</td>
+
+        <td>
+          ${formatter.format(boss.next)}
+          <div class="subtitle">
+            Dead: ${formatter.format(Number(boss.deathAt))}
+          </div>
+        </td>
+
+        <td class="count" data-count="${boss.next}">
+          ${countdown(boss.next - now)}
+        </td>
+
+        <td>
+          <div class="actions">
+            <button class="mark" data-mark="${boss.index}">
+              Mark Dead
+            </button>
+
+            <button data-dedit="${boss.index}">Edit</button>
+
+            <button class="remove" data-ddel="${boss.index}">×</button>
+          </div>
+        </td>
+      </tr>
+    `).join('')
+
+    : `
+      <tr>
+        <td colspan="5" class="empty">
+          No dynamic bosses added.
+        </td>
+      </tr>
+    `;
+}
+
+
+/* FILTER */
+
+$('viewFilter').onchange = render;
+
+
+/* ADD BOSS */
+
+$('bossForm').onsubmit = event => {
+
+  event.preventDefault();
+
+  const name = $('bossName').value.trim();
+
+  if (!name) return;
+
+  if (mode === 'dynamic') {
+
+    const hours = Number($('hours').value);
+    const deathAt = phToMs($('deathTime').value);
+
+    if (!(hours > 0) || !Number.isFinite(deathAt)) return;
+
+    dynamics.push({
+      name,
+      hours,
+      deathAt
+    });
+
+    localStorage.setItem(DKEY, JSON.stringify(dynamics));
+
+  } else {
+
+    const day = Number($('fixedDay').value);
+    const time = $('fixedTime').value;
+
+    if (
+      !Number.isInteger(day) ||
+      day < 0 ||
+      day > 6 ||
+      !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)
+    ) return;
+
+    fixed.push({
+      name,
+      day,
+      time
+    });
+
+    localStorage.setItem(FKEY, JSON.stringify(fixed));
+  }
+
+  event.target.reset();
+  render();
+};
+
+
+/* MARK DEAD WINDOW */
+
+function openMark(index) {
+
+  markIndex = index;
+
+  $('deathBossLabel').textContent =
+    `${dynamics[index].name} — enter the time it was defeated.`;
+
+  $('newDeathTime').value = msToPH(Date.now());
+
+  $('deathModal').classList.add('open');
+}
+
+function closeMark() {
+  $('deathModal').classList.remove('open');
+  markIndex = null;
+}
+
+$('cancelDeath').onclick = closeMark;
+
+$('saveDeath').onclick = () => {
+
+  if (markIndex === null) return;
+
+  const death = phToMs($('newDeathTime').value);
+
+  if (!Number.isFinite(death)) return;
+
+  dynamics[markIndex].deathAt = death;
+
+  localStorage.setItem(DKEY, JSON.stringify(dynamics));
+
+  closeMark();
+  render();
+};
+
+
+/* EDIT AND DELETE */
+
+document.body.addEventListener('click', event => {
+
+  const target = event.target;
+
+
+  /* MARK DEAD */
+
+  if (target.dataset.mark !== undefined) {
+    openMark(Number(target.dataset.mark));
+    return;
+  }
+
+
+  /* DELETE DYNAMIC */
+
+  if (target.dataset.ddel !== undefined) {
+
+    dynamics.splice(Number(target.dataset.ddel), 1);
+
+    localStorage.setItem(DKEY, JSON.stringify(dynamics));
+
+    render();
+    return;
+  }
+
+
+  /* DELETE FIXED */
+
+  if (target.dataset.fdel !== undefined) {
+
+    fixed.splice(Number(target.dataset.fdel), 1);
+
+    localStorage.setItem(FKEY, JSON.stringify(fixed));
+
+    render();
+    return;
+  }
+
+
+  /* EDIT DYNAMIC */
+
+  if (target.dataset.dedit !== undefined) {
+
+    const index = Number(target.dataset.dedit);
+    const boss = dynamics[index];
+
+    const name = prompt('Boss name:', boss.name);
+    if (name === null) return;
+
+    const hours = Number(
+      prompt('Respawn interval in hours:', boss.hours)
+    );
+
+    if (!(hours > 0)) return;
+
+    const death = prompt(
+      'Time of death (YYYY-MM-DDTHH:mm, Philippine Time):',
+      msToPH(Number(boss.deathAt))
+    );
+
+    if (death === null) return;
+
+    const timestamp = phToMs(death);
+
+    if (name.trim() && Number.isFinite(timestamp)) {
+
+      dynamics[index] = {
+        name: name.trim(),
+        hours,
+        deathAt: timestamp
+      };
+
+      localStorage.setItem(DKEY, JSON.stringify(dynamics));
+      render();
+    }
+
+    return;
+  }
+
+
+  /* EDIT FIXED */
+
+  if (target.dataset.fedit !== undefined) {
+
+    const index = Number(target.dataset.fedit);
+    const boss = fixed[index];
+
+    const name = prompt('Boss name:', boss.name);
+    if (name === null) return;
+
+    const dayInput = prompt(
+      'Spawn day (Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday):',
+      DAYS[boss.day]
+    );
+
+    if (dayInput === null) return;
+
+    const day = DAYS.findIndex(
+      d => d.toLowerCase() === dayInput.trim().toLowerCase()
+    );
+
+    const time = prompt(
+      'Spawn time (24-hour format HH:mm):',
+      boss.time
+    );
+
+    if (time === null) return;
+
+    if (
+      name.trim() &&
+      day !== -1 &&
+      /^([01]\d|2[0-3]):[0-5]\d$/.test(time)
+    ) {
+
+      fixed[index] = {
+        name: name.trim(),
+        day,
+        time
+      };
+
+      localStorage.setItem(FKEY, JSON.stringify(fixed));
+      render();
+    } else {
+      alert('Please enter a valid day and time. Example: Monday and 15:00.');
+    }
+  }
+
+});
+
+
+/* LIVE COUNTDOWN */
+
+function tick() {
+
+  const now = Date.now();
+
+  document.querySelectorAll('[data-count]').forEach(element => {
+
+    element.textContent = countdown(
+      Number(element.dataset.count) - now
+    );
+
+  });
+
+}
+
+
+/* INITIALIZE */
+
+setMode('dynamic');
+render();
+setInterval(tick, 1000);
+
+</script>
+
+
+
+</body></html>
