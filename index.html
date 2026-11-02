@@ -203,11 +203,10 @@ dialog::backdrop { background:#000a; }
   <h3>Admin Login</h3>
   <form id="loginForm">
     <label>Email</label>
-    <input id="email" type="email" value="wolfy0098@gmail.com" required>
-    <label style="margin-top:10px">Password</label>
-    <input id="password" type="password" required>
-    <div id="loginError" class="status error" style="margin-top:8px"></div>
-    <div class="dialog-actions">
+    <input id="email" type="email" placeholder="Enter admin email" autocomplete="off" value="" required>
+<label style="margin-top:10px">Password</label>
+<input id="password" type="password" placeholder="Enter password" autocomplete="current-password" required>
+<div id="loginError" class="status error" style="margin-top:8px"></div>
       <button type="button" id="loginCancel">Cancel</button>
       <button class="primary" type="submit">Log In</button>
     </div>
