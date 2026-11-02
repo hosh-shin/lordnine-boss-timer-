@@ -6,92 +6,231 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LORDNINE Boss Respawn Tracker</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 :root {
   color-scheme: dark;
-  --bg:#101318; --panel:#191e26; --line:#303846;
-  --text:#edf2f8; --muted:#9aa5b5; --gold:#d6a84f;
+  --bg:#101318;
+  --panel:#191e26;
+  --line:#303846;
+  --text:#edf2f8;
+  --muted:#9aa5b5;
+  --gold:#d6a84f;
 }
+
 * { box-sizing:border-box; }
+
 body {
-  margin:0; padding:18px; background:var(--bg);
-  color:var(--text); font:14px system-ui,sans-serif;
+  margin:0;
+  padding:18px;
+  background:var(--bg);
+  color:var(--text);
+  font:14px system-ui,sans-serif;
 }
+
 .wrap { max-width:1100px; margin:auto; }
+
 header,.toolbar,.switch-row {
-  display:flex; justify-content:space-between;
-  align-items:center; gap:12px; flex-wrap:wrap;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
 }
+
 header { margin-bottom:15px; }
+
 h1 { font-size:20px; margin:0; }
+
 .panel {
-  background:var(--panel); border:1px solid var(--line);
-  border-radius:10px; padding:14px; margin-bottom:14px;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:14px;
+  margin-bottom:14px;
 }
-.sub,.muted { color:var(--muted); font-size:12px; }
+
+.sub,.muted {
+  color:var(--muted);
+  font-size:12px;
+}
+
 .form-grid {
-  display:grid; grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:10px; align-items:end;
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+  align-items:end;
 }
-.form-grid.fixed { grid-template-columns:repeat(3,minmax(0,1fr)); }
-label { display:block; color:var(--muted); font-size:12px; margin-bottom:5px; }
+
+.form-grid.fixed {
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+
+label {
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+  margin-bottom:5px;
+}
+
 input,select {
-  width:100%; min-width:0; padding:9px;
-  background:#11161d; color:var(--text);
-  border:1px solid var(--line); border-radius:7px;
+  width:100%;
+  min-width:0;
+  padding:9px;
+  background:#11161d;
+  color:var(--text);
+  border:1px solid var(--line);
+  border-radius:7px;
 }
+
 button {
-  padding:8px 11px; border:1px solid var(--line);
-  border-radius:7px; background:#252d39;
-  color:var(--text); cursor:pointer; font-weight:600;
+  padding:8px 11px;
+  border:1px solid var(--line);
+  border-radius:7px;
+  background:#252d39;
+  color:var(--text);
+  cursor:pointer;
+  font-weight:600;
 }
+
 button:hover { border-color:var(--gold); }
-button.primary { background:var(--gold); color:#171717; }
+
+button.primary {
+  background:var(--gold);
+  color:#171717;
+}
+
 button.danger { color:#ffaaaa; }
-button.active { border-color:var(--gold); color:#ffe2a2; }
-.actions,.switch { display:flex; gap:7px; align-items:center; flex-wrap:wrap; }
+
+button.active {
+  border-color:var(--gold);
+  color:#ffe2a2;
+}
+
+.actions,.switch,.tabs {
+  display:flex;
+  gap:7px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.tabs { margin-bottom:12px; }
+
 .hidden { display:none!important; }
+
+.tab-panel.hidden { display:none!important; }
+
+.day-heading {
+  font-size:16px;
+  font-weight:700;
+  margin:2px 0 12px;
+}
+
 .table-wrap { overflow-x:auto; }
-table { width:100%; border-collapse:collapse; min-width:650px; }
+
+table {
+  width:100%;
+  border-collapse:collapse;
+  min-width:600px;
+}
+
 th,td {
-  text-align:left; padding:10px 9px;
+  text-align:left;
+  padding:10px 9px;
   border-bottom:1px solid var(--line);
 }
+
 th {
-  color:var(--muted); font-size:11px;
-  text-transform:uppercase; letter-spacing:.06em;
+  color:var(--muted);
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.06em;
 }
+
 td:first-child { font-weight:650; }
+
 .type {
-  display:inline-block; padding:3px 6px; border-radius:5px;
-  background:#273444; color:#b9d7f4;
-  font-size:10px; text-transform:uppercase;
+  display:inline-block;
+  padding:3px 6px;
+  border-radius:5px;
+  background:#273444;
+  color:#b9d7f4;
+  font-size:10px;
+  text-transform:uppercase;
 }
-.type.fixed { background:#3b3325; color:#f0d39b; }
-.countdown { color:#f1d18c; font-weight:750; white-space:nowrap; }
-.row-actions { display:flex; gap:5px; flex-wrap:wrap; }
-.row-actions button { padding:5px 7px; font-size:11px; }
-.empty { text-align:center; color:var(--muted); padding:24px; }
-.status { color:var(--muted); font-size:12px; }
+
+.type.fixed {
+  background:#3b3325;
+  color:#f0d39b;
+}
+
+.countdown {
+  color:#f1d18c;
+  font-weight:750;
+  white-space:nowrap;
+}
+
+.row-actions {
+  display:flex;
+  gap:5px;
+  flex-wrap:wrap;
+}
+
+.row-actions button {
+  padding:5px 7px;
+  font-size:11px;
+}
+
+.empty {
+  text-align:center;
+  color:var(--muted);
+  padding:24px;
+}
+
+.status {
+  color:var(--muted);
+  font-size:12px;
+}
+
 .error { color:#ff9999; }
 .ok { color:#78c99a; }
+
 dialog {
-  background:var(--panel); color:var(--text);
-  border:1px solid var(--line); border-radius:10px;
-  width:min(420px,calc(100% - 28px)); padding:18px;
+  background:var(--panel);
+  color:var(--text);
+  border:1px solid var(--line);
+  border-radius:10px;
+  width:min(420px,calc(100% - 28px));
+  padding:18px;
 }
+
 dialog::backdrop { background:#000a; }
-.dialog-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:14px; }
+
+.dialog-actions {
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  margin-top:14px;
+}
+
 @media(max-width:760px) {
   body { padding:11px; }
-  .form-grid,.form-grid.fixed { grid-template-columns:repeat(2,minmax(0,1fr)); }
+
+  .form-grid,.form-grid.fixed {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
 }
+
 @media(max-width:440px) {
-  .form-grid,.form-grid.fixed { grid-template-columns:1fr; }
+  .form-grid,.form-grid.fixed {
+    grid-template-columns:1fr;
+  }
+
   h1 { font-size:17px; }
 }
 </style>
 </head>
+
 <body>
 <div class="wrap">
 
@@ -100,6 +239,7 @@ dialog::backdrop { background:#000a; }
     <h1>LORDNINE · BOSS RESPAWN TRACKER</h1>
     <div class="sub">Shared tracker · Philippine Time (UTC+8)</div>
   </div>
+
   <div class="actions">
     <span id="authLabel" class="status">Public view</span>
     <button id="loginOpen">Admin Login</button>
@@ -107,6 +247,7 @@ dialog::backdrop { background:#000a; }
   </div>
 </header>
 
+<!-- ADMIN PANEL -->
 <section id="adminPanel" class="panel hidden">
   <div class="toolbar">
     <strong>Add Boss Timer</strong>
@@ -114,29 +255,38 @@ dialog::backdrop { background:#000a; }
   </div>
 
   <form id="bossForm">
+
+    <!-- DYNAMIC INPUTS -->
     <div id="dynamicFields" class="form-grid">
       <div>
         <label>Boss Name</label>
         <input id="bossName" maxlength="100" placeholder="Boss name">
       </div>
+
       <div>
         <label>Respawn Interval (Hours)</label>
         <input id="interval" type="number" min="0.01" step="any" placeholder="e.g. 6.5">
       </div>
+
       <div>
         <label>Time of Death (PHT)</label>
         <input id="deathAt" type="datetime-local">
       </div>
+
       <div>
-        <button class="primary" type="submit" style="width:100%">Add Dynamic Timer</button>
+        <button class="primary" type="submit" style="width:100%">
+          Add Dynamic Timer
+        </button>
       </div>
     </div>
 
+    <!-- FIXED INPUTS -->
     <div id="fixedFields" class="form-grid fixed hidden">
       <div>
         <label>Boss Name</label>
         <input id="fixedName" maxlength="100" placeholder="Boss name">
       </div>
+
       <div>
         <label>Spawn Weekday</label>
         <select id="spawnDay">
@@ -149,75 +299,159 @@ dialog::backdrop { background:#000a; }
           <option value="6">Saturday</option>
         </select>
       </div>
+
       <div>
         <label>Spawn Time (PHT)</label>
         <input id="spawnTime" type="time">
       </div>
+
       <div>
-        <button class="primary" type="submit" style="width:100%">Add Fixed Timer</button>
+        <button class="primary" type="submit" style="width:100%">
+          Add Fixed Timer
+        </button>
       </div>
     </div>
 
     <div class="switch-row" style="margin-top:12px">
       <span class="sub">Timer Type</span>
+
       <div class="switch">
         <button type="button" id="dynamicSwitch" class="active">DYNAMIC</button>
         <button type="button" id="fixedSwitch">FIXED</button>
       </div>
     </div>
   </form>
+
   <div id="adminStatus" class="status" style="margin-top:9px"></div>
 </section>
 
+<!-- BOSS LIST -->
 <section class="panel">
   <div class="toolbar" style="margin-bottom:10px">
     <div>
-      <strong>All Boss Timers</strong>
-      <div class="sub">Sorted by nearest upcoming respawn</div>
+      <strong>Boss Timers</strong>
+      <div class="sub">Dynamic respawns and today's scheduled fixed bosses</div>
     </div>
+
     <span id="connectionStatus" class="status">Connecting...</span>
   </div>
 
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Boss Name</th>
-          <th>Type</th>
-          <th>Respawn Time (PHT)</th>
-          <th>Countdown</th>
-          <th id="actionsHead" class="hidden">Actions</th>
-        </tr>
-      </thead>
-      <tbody id="bossRows">
-        <tr><td colspan="5" class="empty">Loading...</td></tr>
-      </tbody>
-    </table>
+  <!-- TABS -->
+  <div class="tabs">
+    <button type="button" id="dynamicTab" class="active">
+      Dynamic Bosses
+    </button>
+
+    <button type="button" id="fixedTab">
+      Fixed Bosses
+    </button>
+  </div>
+
+  <!-- DYNAMIC BOSSES TAB -->
+  <div id="dynamicTabPanel" class="tab-panel">
+    <div class="sub" style="margin-bottom:8px">
+      Sorted by nearest upcoming respawn
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Boss Name</th>
+            <th>Respawn Time (PHT)</th>
+            <th>Countdown</th>
+            <th id="dynamicActionsHead" class="hidden">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody id="bossRows">
+          <tr>
+            <td colspan="4" class="empty">Loading...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- FIXED BOSSES TAB -->
+  <div id="fixedTabPanel" class="tab-panel hidden">
+    <div id="fixedDayHeading" class="day-heading"></div>
+
+    <div class="sub" style="margin-bottom:8px">
+      Only fixed bosses scheduled for today are shown.
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Boss Name</th>
+            <th>Spawn Time (PHT)</th>
+            <th>Countdown</th>
+            <th id="fixedActionsHead" class="hidden">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody id="fixedBossRows">
+          <tr>
+            <td colspan="4" class="empty">Loading...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </section>
 
-<div class="sub">Countdowns update automatically. Fixed timers repeat weekly.</div>
+<div class="sub">
+  Countdown updates automatically. Fixed timers repeat weekly.
 </div>
 
+</div>
+
+<!-- LOGIN DIALOG -->
 <dialog id="loginDialog">
   <h3>Admin Login</h3>
+
   <form id="loginForm">
     <label>Email</label>
-    <input id="email" type="email" placeholder="Enter admin email" autocomplete="off" value="" required>
-<label style="margin-top:10px">Password</label>
-<input id="password" type="password" placeholder="Enter password" autocomplete="current-password" required>
-<div id="loginError" class="status error" style="margin-top:8px"></div>
+    <input
+      id="email"
+      type="email"
+      placeholder="Enter admin email"
+      autocomplete="off"
+      value=""
+      required
+    >
+
+    <label style="margin-top:10px">Password</label>
+    <input
+      id="password"
+      type="password"
+      placeholder="Enter password"
+      autocomplete="current-password"
+      required
+    >
+
+    <div id="loginError" class="status error" style="margin-top:8px"></div>
+
+    <div class="dialog-actions">
       <button type="button" id="loginCancel">Cancel</button>
       <button class="primary" type="submit">Log In</button>
     </div>
   </form>
 </dialog>
 
+<!-- MARK DEAD DIALOG -->
 <dialog id="deadDialog">
   <h3>Record Boss Death</h3>
-  <p class="sub">Enter the death date and time in Philippine Time.</p>
+
+  <p class="sub">
+    Enter the death date and time in Philippine Time.
+  </p>
+
   <label>Death Time (PHT)</label>
   <input id="deadAtInput" type="datetime-local">
+
   <div class="dialog-actions">
     <button type="button" id="deadCancel">Cancel</button>
     <button type="button" class="primary" id="deadSave">Save</button>
@@ -226,11 +460,17 @@ dialog::backdrop { background:#000a; }
 
 <script>
 (() => {
+
+  // SUPABASE CONFIGURATION
   const SUPABASE_URL = "https://ihojkjojwffdzocikfet.supabase.co";
   const SUPABASE_KEY = "sb_publishable_Pdf-asLZUxZLUH1DFi7hCQ_Ek0zPlt_";
   const ADMIN_EMAIL = "wolfy0098@gmail.com";
 
-  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
   const $ = id => document.getElementById(id);
 
   let session = null;
@@ -239,165 +479,459 @@ dialog::backdrop { background:#000a; }
   let editingId = null;
   let deadTarget = null;
 
-  const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-  const isAdmin = () =>
-    !!session && (session.user.email || "").toLowerCase() === ADMIN_EMAIL;
+  const days = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday"
+  ];
 
+  const isAdmin = () =>
+    !!session &&
+    (session.user.email || "").toLowerCase() === ADMIN_EMAIL;
+
+  // PHILIPPINE TIME HELPERS
   function phtParts(date = new Date()) {
     const parts = new Intl.DateTimeFormat("en-CA", {
       timeZone:"Asia/Manila",
-      year:"numeric",month:"2-digit",day:"2-digit",
-      hour:"2-digit",minute:"2-digit",second:"2-digit",
+      year:"numeric",
+      month:"2-digit",
+      day:"2-digit",
+      hour:"2-digit",
+      minute:"2-digit",
+      second:"2-digit",
       hourCycle:"h23"
     }).formatToParts(date);
-    return Object.fromEntries(parts.map(p => [p.type,p.value]));
+
+    return Object.fromEntries(
+      parts.map(p => [p.type,p.value])
+    );
   }
 
   function phtInput(date = new Date()) {
     const p = phtParts(date);
+
     return `${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}`;
   }
 
   function fromPhtInput(value) {
-    return value ? new Date(value + ":00+08:00") : null;
+    return value
+      ? new Date(value + ":00+08:00")
+      : null;
   }
 
   function formatPht(date) {
     return new Intl.DateTimeFormat("en-PH", {
       timeZone:"Asia/Manila",
-      month:"short",day:"2-digit",year:"numeric",
-      hour:"2-digit",minute:"2-digit",hour12:true
+      month:"short",
+      day:"2-digit",
+      year:"numeric",
+      hour:"2-digit",
+      minute:"2-digit",
+      hour12:true
     }).format(date);
   }
 
+  // NEXT FIXED SPAWN
   function nextFixed(day,time) {
     if (day === null || !time) return null;
 
     const now = new Date();
     const p = phtParts(now);
+
     const [hour,minute] = time.split(":").map(Number);
 
-    const today = new Date(Date.UTC(+p.year,+p.month-1,+p.day));
+    const today = new Date(
+      Date.UTC(+p.year,+p.month-1,+p.day)
+    );
+
     const weekday = today.getUTCDay();
     const offset = (Number(day)-weekday+7)%7;
 
     let next = new Date(Date.UTC(
-      +p.year,+p.month-1,+p.day+offset,hour-8,minute
+      +p.year,
+      +p.month-1,
+      +p.day+offset,
+      hour-8,
+      minute
     ));
 
     if (next <= now) {
       next = new Date(next.getTime()+7*86400000);
     }
+
     return next;
   }
 
+  // RESPAWN CALCULATION
   function respawnAt(b) {
     if (b.timer_type === "dynamic") {
-      if (!b.death_at || !Number(b.interval_hours)) return null;
+      if (!b.death_at || !Number(b.interval_hours)) {
+        return null;
+      }
+
       return new Date(
         new Date(b.death_at).getTime() +
         Number(b.interval_hours)*3600000
       );
     }
+
     return nextFixed(b.spawn_day,b.spawn_time);
   }
 
+  // COUNTDOWN FORMAT
   function countdown(ms) {
     if (ms <= 0) return "00:00:00";
+
     const total = Math.floor(ms/1000);
+
     const d = Math.floor(total/86400);
     const h = Math.floor(total%86400/3600);
     const m = Math.floor(total%3600/60);
     const s = total%60;
+
     return (d ? d+"d " : "") +
       [h,m,s].map(v=>String(v).padStart(2,"0")).join(":");
   }
 
+  // HTML SAFETY
   function escapeHtml(value) {
     return String(value ?? "").replace(/[&<>"']/g,c=>({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#39;"
     }[c]));
   }
 
-  function render() {
-    const rows = bosses.map(b=>({b,at:respawnAt(b)}))
-      .sort((a,b)=>(a.at?.getTime() ?? Infinity)-(b.at?.getTime() ?? Infinity));
+  // CURRENT PHILIPPINE DATE AND WEEKDAY
+  function todayPhtInfo() {
+    const p = phtParts();
 
-    if (!rows.length) {
-      $("bossRows").innerHTML =
-        '<tr><td colspan="5" class="empty">No boss timers added yet.</td></tr>';
-      return;
-    }
+    const date = new Date(Date.UTC(
+      Number(p.year),
+      Number(p.month)-1,
+      Number(p.day)
+    ));
 
-    $("bossRows").innerHTML = rows.map(({b,at}) => {
-      const detail = b.timer_type === "dynamic"
-        ? `Every ${b.interval_hours} hours`
-        : `${days[b.spawn_day] || "—"} · ${b.spawn_time || "—"}`;
+    const weekday = date.getUTCDay();
 
-      const actions = isAdmin()
-        ? `<td><div class="row-actions">
-            ${b.timer_type === "dynamic"
-              ? `<button data-act="dead" data-id="${b.id}">Mark Dead</button>` : ""}
-            <button data-act="edit" data-id="${b.id}">Edit</button>
-            <button class="danger" data-act="delete" data-id="${b.id}">Delete</button>
-           </div></td>`
-        : "";
+    const heading =
+      new Intl.DateTimeFormat("en-PH", {
+        timeZone:"Asia/Manila",
+        month:"long",
+        day:"numeric"
+      }).format(date) +
+      " (" + days[weekday] + ")";
 
-      return `<tr>
-        <td>${escapeHtml(b.name)}<div class="sub">${escapeHtml(detail)}</div></td>
-        <td><span class="type ${b.timer_type}">${b.timer_type}</span></td>
-        <td>${at ? escapeHtml(formatPht(at)) : "Not set"}</td>
-        <td class="countdown" data-countdown="${at ? at.getTime() : ""}">
-          ${at ? countdown(at.getTime()-Date.now()) : "—"}
-        </td>
-        ${actions}
-      </tr>`;
-    }).join("");
+    return {
+      parts:p,
+      weekday,
+      heading
+    };
   }
 
+  // FIXED BOSS SPAWN TIME FOR TODAY
+  function fixedOccurrenceToday(b) {
+    const info = todayPhtInfo();
+
+    if (
+      Number(b.spawn_day) !== info.weekday ||
+      !b.spawn_time
+    ) {
+      return null;
+    }
+
+    const [hour,minute] = b.spawn_time.split(":").map(Number);
+
+    return new Date(Date.UTC(
+      Number(info.parts.year),
+      Number(info.parts.month)-1,
+      Number(info.parts.day),
+      hour-8,
+      minute
+    ));
+  }
+
+  // RENDER BOTH BOSS CATEGORIES
+  function render() {
+
+    // DYNAMIC BOSSES
+    const dynamicRows = bosses
+      .filter(b => b.timer_type === "dynamic")
+      .map(b => ({
+        b,
+        at:respawnAt(b)
+      }))
+      .sort((a,b) =>
+        (a.at?.getTime() ?? Infinity) -
+        (b.at?.getTime() ?? Infinity)
+      );
+
+    $("dynamicActionsHead").classList.toggle(
+      "hidden",
+      !isAdmin()
+    );
+
+    if (!dynamicRows.length) {
+
+      $("bossRows").innerHTML =
+        '<tr><td colspan="4" class="empty">No dynamic bosses added yet.</td></tr>';
+
+    } else {
+
+      $("bossRows").innerHTML = dynamicRows.map(({b,at}) => {
+
+        const actions = isAdmin()
+          ? `<td>
+              <div class="row-actions">
+                <button data-act="dead" data-id="${b.id}">
+                  Mark Dead
+                </button>
+
+                <button data-act="edit" data-id="${b.id}">
+                  Edit
+                </button>
+
+                <button class="danger" data-act="delete" data-id="${b.id}">
+                  Delete
+                </button>
+              </div>
+            </td>`
+          : "";
+
+        return `<tr>
+          <td>
+            ${escapeHtml(b.name)}
+            <div class="sub">
+              Every ${escapeHtml(b.interval_hours)} hours
+            </div>
+          </td>
+
+          <td>
+            ${at ? escapeHtml(formatPht(at)) : "Not set"}
+          </td>
+
+          <td
+            class="countdown"
+            data-countdown="${at ? at.getTime() : ""}"
+          >
+            ${at ? countdown(at.getTime()-Date.now()) : "—"}
+          </td>
+
+          ${actions}
+        </tr>`;
+
+      }).join("");
+    }
+
+    // FIXED BOSSES FOR TODAY ONLY
+    const info = todayPhtInfo();
+
+    $("fixedDayHeading").textContent = info.heading;
+
+    $("fixedActionsHead").classList.toggle(
+      "hidden",
+      !isAdmin()
+    );
+
+    const fixedRows = bosses
+      .filter(b =>
+        b.timer_type === "fixed" &&
+        Number(b.spawn_day) === info.weekday
+      )
+      .map(b => ({
+        b,
+        at:fixedOccurrenceToday(b)
+      }))
+      .sort((a,b) =>
+        (a.at?.getTime() ?? Infinity) -
+        (b.at?.getTime() ?? Infinity)
+      );
+
+    if (!fixedRows.length) {
+
+      $("fixedBossRows").innerHTML =
+        '<tr><td colspan="4" class="empty">No fixed bosses scheduled for today.</td></tr>';
+
+    } else {
+
+      $("fixedBossRows").innerHTML = fixedRows.map(({b,at}) => {
+
+        const actions = isAdmin()
+          ? `<td>
+              <div class="row-actions">
+                <button data-act="edit" data-id="${b.id}">
+                  Edit
+                </button>
+
+                <button class="danger" data-act="delete" data-id="${b.id}">
+                  Delete
+                </button>
+              </div>
+            </td>`
+          : "";
+
+        return `<tr>
+          <td>${escapeHtml(b.name)}</td>
+
+          <td>${escapeHtml(b.spawn_time || "—")}</td>
+
+          <td
+            class="countdown"
+            data-countdown="${at ? at.getTime() : ""}"
+          >
+            ${
+              at
+                ? (
+                    at.getTime() > Date.now()
+                      ? countdown(at.getTime()-Date.now())
+                      : "Spawned"
+                  )
+                : "—"
+            }
+          </td>
+
+          ${actions}
+        </tr>`;
+
+      }).join("");
+    }
+  }
+
+  // TAB SWITCHING
+  function setBossTab(tab) {
+    const showDynamic = tab === "dynamic";
+
+    $("dynamicTabPanel").classList.toggle(
+      "hidden",
+      !showDynamic
+    );
+
+    $("fixedTabPanel").classList.toggle(
+      "hidden",
+      showDynamic
+    );
+
+    $("dynamicTab").classList.toggle(
+      "active",
+      showDynamic
+    );
+
+    $("fixedTab").classList.toggle(
+      "active",
+      !showDynamic
+    );
+  }
+
+  // UPDATE COUNTDOWNS EVERY SECOND
   function updateCountdowns() {
     document.querySelectorAll("[data-countdown]").forEach(el => {
+
       const target = Number(el.dataset.countdown);
-      if (target) el.textContent = countdown(target-Date.now());
+
+      if (target) {
+        const remaining = target-Date.now();
+
+        el.textContent = remaining > 0
+          ? countdown(remaining)
+          : (
+              el.closest("#fixedBossRows")
+                ? "Spawned"
+                : "00:00:00"
+            );
+      }
     });
   }
 
+  // ADMIN DISPLAY
   function updateAdminUI() {
-    $("adminPanel").classList.toggle("hidden",!isAdmin());
-    $("loginOpen").classList.toggle("hidden",isAdmin());
-    $("logoutBtn").classList.toggle("hidden",!isAdmin());
-    $("actionsHead").classList.toggle("hidden",!isAdmin());
+    $("adminPanel").classList.toggle(
+      "hidden",
+      !isAdmin()
+    );
+
+    $("loginOpen").classList.toggle(
+      "hidden",
+      isAdmin()
+    );
+
+    $("logoutBtn").classList.toggle(
+      "hidden",
+      !isAdmin()
+    );
+
+    $("dynamicActionsHead").classList.toggle(
+      "hidden",
+      !isAdmin()
+    );
+
+    $("fixedActionsHead").classList.toggle(
+      "hidden",
+      !isAdmin()
+    );
+
     $("authLabel").textContent = isAdmin()
-      ? "Admin: "+ADMIN_EMAIL : "Public view";
+      ? "Admin: "+ADMIN_EMAIL
+      : "Public view";
+
     render();
   }
 
+  // LOAD BOSSES FROM SUPABASE
   async function loadBosses() {
-    const {data,error} = await db.from("bosses").select("*");
+    const {data,error} = await db
+      .from("bosses")
+      .select("*");
 
     if (error) {
       $("connectionStatus").textContent = "Database error";
       $("connectionStatus").className = "status error";
+
       console.error(error);
       return;
     }
 
     bosses = data || [];
+
     $("connectionStatus").textContent = "Live · synced";
     $("connectionStatus").className = "status ok";
+
     render();
   }
 
+  // ADD/EDIT FORM MODE
   function setMode(value) {
     mode = value;
-    $("dynamicFields").classList.toggle("hidden",value !== "dynamic");
-    $("fixedFields").classList.toggle("hidden",value !== "fixed");
-    $("dynamicSwitch").classList.toggle("active",value === "dynamic");
-    $("fixedSwitch").classList.toggle("active",value === "fixed");
+
+    $("dynamicFields").classList.toggle(
+      "hidden",
+      value !== "dynamic"
+    );
+
+    $("fixedFields").classList.toggle(
+      "hidden",
+      value !== "fixed"
+    );
+
+    $("dynamicSwitch").classList.toggle(
+      "active",
+      value === "dynamic"
+    );
+
+    $("fixedSwitch").classList.toggle(
+      "active",
+      value === "fixed"
+    );
 
     $("bossName").required = value === "dynamic";
     $("interval").required = value === "dynamic";
     $("deathAt").required = value === "dynamic";
+
     $("fixedName").required = value === "fixed";
     $("spawnTime").required = value === "fixed";
   }
@@ -405,8 +939,14 @@ dialog::backdrop { background:#000a; }
   $("dynamicSwitch").onclick = () => setMode("dynamic");
   $("fixedSwitch").onclick = () => setMode("fixed");
 
+  $("dynamicTab").onclick = () => setBossTab("dynamic");
+  $("fixedTab").onclick = () => setBossTab("fixed");
+
+  // ADD OR UPDATE BOSS
   $("bossForm").addEventListener("submit",async e => {
+
     e.preventDefault();
+
     if (!isAdmin()) return;
 
     const payload = mode === "dynamic"
@@ -429,10 +969,16 @@ dialog::backdrop { background:#000a; }
 
     if (!payload.name) return;
 
-    if (mode === "dynamic" &&
-        (!payload.interval_hours || !payload.death_at)) return;
+    if (
+      mode === "dynamic" &&
+      (!payload.interval_hours || !payload.death_at)
+    ) {
+      return;
+    }
 
-    if (mode === "fixed" && !payload.spawn_time) return;
+    if (mode === "fixed" && !payload.spawn_time) {
+      return;
+    }
 
     const query = editingId
       ? db.from("bosses").update(payload).eq("id",editingId)
@@ -441,48 +987,78 @@ dialog::backdrop { background:#000a; }
     const {error} = await query;
 
     if (error) {
-      $("adminStatus").textContent = "Save failed: "+error.message;
+      $("adminStatus").textContent =
+        "Save failed: "+error.message;
+
       $("adminStatus").className = "status error";
       return;
     }
 
     editingId = null;
+
     $("bossForm").reset();
+
     $("adminStatus").textContent = "Boss timer saved.";
     $("adminStatus").className = "status ok";
+
     await loadBosses();
   });
 
-  $("bossRows").addEventListener("click",async e => {
+  // EDIT AND DELETE ACTIONS FOR BOTH TABS
+  async function handleBossAction(e) {
+
     const button = e.target.closest("button[data-act]");
+
     if (!button || !isAdmin()) return;
 
-    const boss = bosses.find(b=>b.id === button.dataset.id);
+    const boss = bosses.find(
+      b => b.id === button.dataset.id
+    );
+
     if (!boss) return;
 
     if (button.dataset.act === "delete") {
+
       if (!confirm(`Delete ${boss.name}?`)) return;
-      const {error} = await db.from("bosses").delete().eq("id",boss.id);
-      if (error) alert("Delete failed: "+error.message);
-      else await loadBosses();
+
+      const {error} = await db
+        .from("bosses")
+        .delete()
+        .eq("id",boss.id);
+
+      if (error) {
+        alert("Delete failed: "+error.message);
+      } else {
+        await loadBosses();
+      }
     }
 
     if (button.dataset.act === "dead") {
+
       deadTarget = boss;
+
       $("deadAtInput").value = phtInput();
+
       $("deadDialog").showModal();
     }
 
     if (button.dataset.act === "edit") {
+
       editingId = boss.id;
+
       setMode(boss.timer_type);
 
       if (boss.timer_type === "dynamic") {
+
         $("bossName").value = boss.name;
         $("interval").value = boss.interval_hours;
+
         $("deathAt").value = boss.death_at
-          ? phtInput(new Date(boss.death_at)) : "";
+          ? phtInput(new Date(boss.death_at))
+          : "";
+
       } else {
+
         $("fixedName").value = boss.name;
         $("spawnDay").value = boss.spawn_day;
         $("spawnTime").value = boss.spawn_time;
@@ -490,16 +1066,38 @@ dialog::backdrop { background:#000a; }
 
       $("adminStatus").textContent =
         "Editing "+boss.name+". Submit the form to save.";
-      window.scrollTo({top:0,behavior:"smooth"});
-    }
-  });
 
+      window.scrollTo({
+        top:0,
+        behavior:"smooth"
+      });
+    }
+  }
+
+  $("bossRows").addEventListener(
+    "click",
+    handleBossAction
+  );
+
+  $("fixedBossRows").addEventListener(
+    "click",
+    handleBossAction
+  );
+
+  // SAVE BOSS DEATH TIME
   $("deadSave").onclick = async () => {
+
     if (!deadTarget || !$("deadAtInput").value) return;
 
-    const death = fromPhtInput($("deadAtInput").value);
-    const {error} = await db.from("bosses")
-      .update({death_at:death.toISOString()})
+    const death = fromPhtInput(
+      $("deadAtInput").value
+    );
+
+    const {error} = await db
+      .from("bosses")
+      .update({
+        death_at:death.toISOString()
+      })
       .eq("id",deadTarget.id);
 
     if (error) {
@@ -508,17 +1106,29 @@ dialog::backdrop { background:#000a; }
     }
 
     $("deadDialog").close();
+
     deadTarget = null;
+
     await loadBosses();
   };
 
-  $("deadCancel").onclick = () => $("deadDialog").close();
+  $("deadCancel").onclick = () => {
+    $("deadDialog").close();
+  };
 
-  $("loginOpen").onclick = () => $("loginDialog").showModal();
-  $("loginCancel").onclick = () => $("loginDialog").close();
+  // LOGIN
+  $("loginOpen").onclick = () => {
+    $("loginDialog").showModal();
+  };
+
+  $("loginCancel").onclick = () => {
+    $("loginDialog").close();
+  };
 
   $("loginForm").addEventListener("submit",async e => {
+
     e.preventDefault();
+
     $("loginError").textContent = "";
 
     const {data,error} = await db.auth.signInWithPassword({
@@ -532,43 +1142,65 @@ dialog::backdrop { background:#000a; }
     }
 
     session = data.session;
+
     $("loginDialog").close();
     $("password").value = "";
+
     updateAdminUI();
   });
 
+  // LOGOUT
   $("logoutBtn").onclick = async () => {
+
     await db.auth.signOut();
+
     session = null;
+
     updateAdminUI();
   };
 
+  // AUTH STATE
   db.auth.onAuthStateChange((_event,newSession) => {
+
     session = newSession;
+
     updateAdminUI();
   });
 
+  // REALTIME SUPABASE UPDATES
   db.channel("bosses-live")
     .on("postgres_changes",{
-      event:"*",schema:"public",table:"bosses"
+      event:"*",
+      schema:"public",
+      table:"bosses"
     },() => loadBosses())
     .subscribe(status => {
+
       if (status === "SUBSCRIBED") {
         $("connectionStatus").textContent = "Live · connected";
       }
     });
 
+  // INITIALIZE
   setInterval(updateCountdowns,1000);
+
+  // Refresh daily heading and fixed boss list regularly.
   setInterval(render,60000);
 
   setMode("dynamic");
+  setBossTab("dynamic");
+
   loadBosses();
 
   db.auth.getSession().then(({data}) => {
+
     session = data.session;
+
     updateAdminUI();
   });
+
 })();
 </script>
+
 </body>
 </html>
